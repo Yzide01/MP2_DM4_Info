@@ -12,7 +12,7 @@ let implique (f1, f2) = Or(Not f1, f2)
 let equivalence (f1, f2) = And(implique (f1, f2), implique (f2, f1))
 
 (*** PARSER ***)
-*
+
 
 exception Erreur_syntaxe
 exception Fichier_invalide
@@ -212,8 +212,8 @@ let rec simpl_step (f: formule): formule*bool=
 	|Not(Top) -> (Bot,true)
 	|Not(Bot) -> (Top,true) 
 	|And(x,y) -> let (f1,b1),(f2,b2)=simpl_step x, simpl_step y in (And(f1,f2), b1||b2)
-	|Or(x,y) -> Or(simpl_step x, simpl_step y) let (f1,b1),(f2,b2)=simpl_step x, simpl_step y in (Or(f1,f2), b1||b2)
-	|Not(x) -> Not(simpl_step x) let (f1,b1)=simpl_step x in (Not(f1), b1)
+	|Or(x,y) -> let (f1,b1),(f2,b2)=simpl_step x, simpl_step y in (Or(f1,f2), b1||b2)
+	|Not(x) -> let (f1,b1)=simpl_step x in (Not(f1), b1)
 	|x -> (x,false)
 
 
@@ -221,9 +221,9 @@ let rec simpl_full(f:formule):formule=
   let (f_simplifie,bool_simplification) =simpl_step f in if bool_simplification=true then simpl_full f_simplifie else f_simplifie
 
 (*Q21*)
-let rec subst(f:formule)(remplace:string)(remplacement: string):formule=
+let rec subst(f:formule)(remplace:string)(remplacement: formule):formule=
   match f with 
-  |Var x->if x=remplace then Var remplacement else Var x
+  |Var x->if x=remplace then remplacement else Var x
   |And(x,y)->And(subst x  remplace remplacement,subst y remplace remplacement)
 	|Or(x,y)->Or(subst x  remplace remplacement,subst y remplace remplacement)
 	|Not(x)->Not(subst x  remplace remplacement)
@@ -234,20 +234,28 @@ let rec subst(f:formule)(remplace:string)(remplacement: string):formule=
 let  quine(f:formule):sat_result=
   let liste_variables = calcul_var_formule f in
 	(*f_sauvegarde est très importante si on a remplacé X par top mais que ça nous donne bot après simplification de la nouvelle formule, alors on révalue la formule avant le changement qui est f_sauvegarde en remplacement X par Bot *)
-  let remplacement_quine(f :formule)(f_sauvegarde:formule)(valuation_actu:valuation)(liste_var_a_test:'a list):sat_result=
+  let rec remplacement_quine(f :formule)(f_sauvegarde:formule)(valuation_actu:valuation)(liste_var_a_test:'a list):sat_result=
 	  match f with 
 	  |Top->Some valuation_actu
-		|Bot->match valuation_actu with
-		        |x::q->match x with 
-						      |(variable,1)->remplacement_quine (simpl_full f_sauvegarde) f_sauvegarde ((variable,0)::q)(liste_var_a_test) (*Si top ne marche pas, on test avec bot *)
-									|(variable,0)->None   (*non sat*)
+		|Bot->begin
+		      match valuation_actu with
+		        |x::q->begin
+						    match x with 
+						      |(variable,true)->remplacement_quine f_sauvegarde f_sauvegarde ((variable,false)::q)(liste_var_a_test) 
+									|(variable,false)->None   (*non sat*)
+							end
+						|[]->None
+			end
 		|_->match liste_var_a_test with(*Dans le cas où on ne peut encore déterminer si c'est sat*)
-		      |x::q->let post_chg=subst f x Top in remplacement_quine (simpl_full post_chg) f ((x,1)::valuation_actu) q  
+		      |x::q->let post_chg=(subst f x Top )in remplacement_quine (simpl_full post_chg) f ((x,true)::valuation_actu) q  
 					|[]->failwith "Erreur ,var a test= [] , la fonction ne marche pas. CODE A MODIFIER " 
-  in remplacement_quine f [] liste_variables
-
+  in remplacement_quine f f [] liste_variables 
+(*Q23*)
 	
-
+let rec print_true(environnement:valuation):unit=
+   match environnement with
+	 |(variable,true)::q->print_string(variable);print_true q
+	 |[]->print_string "\n"
 
 
 
@@ -272,7 +280,7 @@ let test_compte_ops()=
 let test_satsolv_naif()=
    assert(satsolver_naif(parse("a|b"))=Some[("a",true);("b",false)])
 	
-let test()=
+let test()=	
    assert(1=1);
 	 test_parse();
 	 test_compte_ops();
@@ -287,13 +295,18 @@ let main()=
       if Sys.argv.(1) ="test" then test()
       else
          let fichier =read_file Sys.argv.(1) in
-         print_string fichier; 
+         (**print_string fichier; 
          print_string "\n\n";
          print_string Sys.argv.(0); print_string "\n\n";
          print_string Sys.argv.(1);print_string "\n\n"
-         
-         
+**)
+  let formule=from_file fichier in
+	let reponse=quine formule in 
+	match reponse with
+	|None->print_string"Cette formule n'est pas satisfiable!\n"
+	|Some environnement->if environnement =[]then print_string "Il faut que toutes les variables soient évalués en 0 \n"
+	else print_string "La formule est satisfiable en assignant 1 aux variables suivantes et 0 aux autres:\n" ;print_true environnement     
+    
       
 let _=main()
-(*Actuellement : Q 21*)
 
