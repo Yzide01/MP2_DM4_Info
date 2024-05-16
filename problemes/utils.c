@@ -24,46 +24,66 @@ char* au_moins_une(char** l, int n){
 
 
 char* au_plus_une(char**l,int n){
-    char *res =malloc(100*sizeof(char));
+    /*
+    On va faire la négation de au moins 2 , (en effet pour N variables, on fera au total 2 parmi N paquets à évaluer qui sont chacun une conjonction de 2 variable, et l'ensemble est une négation d'une FN C
+    Et donc en développement la négation , on a une FNC avec dans chaque 2 variables, la disjonction de la négation 2 variables 
+    */
+    int taille_res=100000;
+    char *res =malloc(taille_actu*sizeof(char));
     int indice =0;
-    char* non_neg=NULL ;
-    for(int i=0;i<n;i++){//pour chaque truc non nég
-        res[indice]='(';
-        indice++;
-        for(int j=0;j<n;j++){
-            if (i!=j){
-                res[indice]='~';
-            }
-
-            if(len(l[j])!=1){//On traite le cas où ce n'est pas juste une variable
-                res[indice+1]='(';
+    for(int i=0;i<n;i++){
+      while(taille_actu<indice+strlen[j]+strlen[i]+15){
+        taille_actu*=2;
+        res=realloc(res,taille_actu*sizeof(char));
+        
+      }
+      res[indice]='(';
+      indice++;
+      //Commencement de la création du paquet
+      for (int j=i;j<n;j++){
+        if(strlen(l[j])!=1){//On traite le cas où ce n'est pas juste une variable
+                
+                res[indice]='(~';
                 indice+=2;
-                for(int z=0;z<len(l[j]);z++){
+                for(int z=0;z<strlen(l[j]);z++){
                     res[indice+z]=l[j][z];
                 }
-                indice+=len(l[j]);
+                indice+=strlen(l[j]);
                 res[indice]=')';
                 indice++;
             }
-            else{
-                res[indice+1]=l[j][0];
-                indice++;
+        else{
+            res[indice]='~';
+            res[indice+1]=l[j][0];
+            indice+=2;
             }
-            if (j!=n-1){//Evite le et inutile à la fin 
-                res[indice]='&';
-                indice++;
-            }
-
-            
+        res[indice ]='|';
+        indice++;
+        if(len(l[i])=1){
+           res[indice]=l[i][0];
+           res[indice+1]=')';
+        }
+        else{
+           for(int z=0;z<strlen(l[j]);z++){
+                    res[indice+z]=l[j][z];
+                }
+                indice+=strlen(l[j]);
+                res[indice]=')';
+                res[indice+1]=')';// Fermeture du paquet 
             
         }
-        res[indice]=')';
-        res[indice+1]='|';
-        indice+=2;
-    }//Il manque maintenant que le cas où tout est faux . 
-    return res;
+
+      }
+      if(j!=(n-1)){
+        res[indice]='&';
+        indice++
+      }
+    }
+        return res;
 
 }
+
+
 char* separation_et(char** l, int n){//attention modification à faire,fonction auxiliaire pour la Q30
     char* res = malloc(100*sizeof(char));
 
