@@ -35,13 +35,13 @@ char* au_plus_une(char**l,int n){
                 res[indice]='~';
             }
 
-            if(len(l[j])!=1){//On traite le cas où ce n'est pas juste une variable
+            if(strlen(l[j])!=1){//On traite le cas où ce n'est pas juste une variable
                 res[indice+1]='(';
                 indice+=2;
-                for(int z=0;z<len(l[j]);z++){
+                for(int z=0;z<strlen(l[j]);z++){
                     res[indice+z]=l[j][z];
                 }
-                indice+=len(l[j]);
+                indice+=strlen(l[j]);
                 res[indice]=')';
                 indice++;
             }
