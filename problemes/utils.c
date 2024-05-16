@@ -29,21 +29,25 @@ char* au_plus_une(char**l,int n){
     Et donc en développement la négation , on a une FNC avec dans chaque 2 variables, la disjonction de la négation 2 variables 
     */
     int taille_res=100000;
-    char *res =malloc(taille_actu*sizeof(char));
+    char *res =malloc(taille_res*sizeof(char));
     int indice =0;
+    res[0] = '(';
+    indice++;
     for(int i=0;i<n;i++){
-      while(taille_actu<indice+strlen[j]+strlen[i]+15){
-        taille_actu*=2;
-        res=realloc(res,taille_actu*sizeof(char));
-        
-      }
+
       res[indice]='(';
       indice++;
       //Commencement de la création du paquet
       for (int j=i;j<n;j++){
+        while(taille_res<indice+strlen(l[j])+strlen(l[i])+15){
+        taille_res*=2;
+        res=realloc(res,taille_res*sizeof(char));
+        
+      }
         if(strlen(l[j])!=1){//On traite le cas où ce n'est pas juste une variable
                 
-                res[indice]='(~';
+                res[indice]='(';
+                res[indice+1]='~';
                 indice+=2;
                 for(int z=0;z<strlen(l[j]);z++){
                     res[indice+z]=l[j][z];
@@ -59,9 +63,13 @@ char* au_plus_une(char**l,int n){
             }
         res[indice ]='|';
         indice++;
-        if(len(l[i])=1){
+        if(strlen(l[i])==1){
+           res[indice]='~';
+           indice++;
            res[indice]=l[i][0];
-           res[indice+1]=')';
+           indice++;
+           res[indice]=')';//fermeture du paquet
+           indice++;
         }
         else{
            for(int z=0;z<strlen(l[j]);z++){
@@ -74,11 +82,12 @@ char* au_plus_une(char**l,int n){
         }
 
       }
-      if(j!=(n-1)){
+      if(i!=(n-1)){
         res[indice]='&';
-        indice++
+        indice++;
       }
     }
+    res[indice] = ')';
         return res;
 
 }
@@ -111,12 +120,11 @@ int main(){
 
     //tests
     char* forms[3] = {"(x & ~y)","y","z"};
-    char* phi = au_moins_une(forms,3);
-    for (int i = 0; i<20; i++){
-        printf("%c",phi[i]);
-    }
+    char* phi = au_plus_une(forms,3);
+    printf("%s",phi);
     free(phi);
 
     return 0;
 }
+
 */
