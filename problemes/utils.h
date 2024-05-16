@@ -5,3 +5,5 @@ char* au_moins_une(char** l, int n);
 char* au_moins_une(char** l, int n);
 
 char* au_plus_une(char** l, int n);
+
+char* separation_et(char** l, int n);
