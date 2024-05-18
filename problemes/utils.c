@@ -131,27 +131,6 @@ char* separation_et(char** l, int n){//attention modification à faire,fonction 
 
 
 
-char* separation_et(char** l, int n){//attention modification à faire,fonction auxiliaire pour la Q30
-    char* res = malloc(100*sizeof(char));
-
-    res[0] = '(';
-    int indice = 1;
-    for (int i = 0; i < n; i++){
-        for (int j = 0; j < strlen(l[i]);j++){
-            res[indice] = l[i][j];
-            indice ++;
-        }
-        if (i != n - 1){ 
-            res[indice] = ' ';
-            res[indice+1] = '&';
-            res[indice+2] = ' ';
-            indice = indice + 3;
-        }
-    }
-    res[indice] = ')';
-    return res;
-}
-
 
 /*
 int main(){
