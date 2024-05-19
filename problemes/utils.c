@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 
+
 char* au_moins_une(char** l, int n,int *taille_formule){
     int taille_res=5000;
     char* res = malloc(taille_res*sizeof(char));
@@ -104,13 +105,15 @@ char* separation_et(char** l, int n){//attention modification à faire,fonction 
 
     res[0] = '(';
     int indice = 1;
+    int taille_l_i=0;
     for (int i = 0; i < n; i++){
-        while(taille_res<indice+strlen(l[i])+5){
+        taille_l_i=strlen(l[i]);
+        while(taille_res<indice+taille_l_i+10){
             taille_res*=2;
             res=realloc(res,taille_res*sizeof(char));
 
         }
-        for (int j = 0; j < strlen(l[i]);j++){
+        for (int j = 0; j < taille_l_i;j++){
             res[indice] = l[i][j];
             indice ++;
         }
@@ -124,25 +127,3 @@ char* separation_et(char** l, int n){//attention modification à faire,fonction 
     res[indice] = ')';
     return res;
 }
-
-
-   
-
-
-
-
-
-/*
-int main(){
-
-    //tests
-    char* forms[3] = {"(x & ~y)","y","z"};
-    char* phi = au_moins_une(forms,3);
-    for (int i = 0; i<20; i++){
-        printf("%c",phi[i]);
-    }
-    free(phi);
-
-    return 0;
-}
-*/
