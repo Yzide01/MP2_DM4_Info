@@ -1,174 +1,136 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "utils.h"
-
-char* variable(int i, int j){
-    char* res = malloc(10*sizeof(char));
-    sprintf(res,"X_%d_%d",i,j);
-    return res;
-}
-
-char* contrainte_une_ligne(int i, int n){
-    char** l = malloc(n*sizeof(char*));
-    for (int j = 0; j < n; j++){
-        l[j] = variable(i,j);
-    }
-    int *taille_phi1=malloc(sizeof(int));
-    int *taille_phi2=malloc(sizeof(int));
-    char* phi1 = au_moins_une(l,n,taille_phi1);
-    
-    char* phi2 = au_plus_une(l,n,taille_phi2);
-
-    char* phi3 = malloc(   ((*taille_phi1)+ (*taille_phi2)+1)*sizeof(char)); 
-    phi3[0]='\0';
-    strcpy(phi3, phi1); 
-    strcat(phi3, "&");
-    strcat(phi3, phi2);
-
-    free (l);
-    free(taille_phi1);
-    free(taille_phi2);
-    return phi3;
-
-}
+#include <stdio.h>
 
 
-char* contrainte_toutes_lignes(int n){
-    
-    char** l = malloc(n*sizeof(char*));
+char* au_moins_une(char** l, int n,int *taille_formule){
+    int taille_res=5000;
+    char* res = malloc(taille_res*sizeof(char));
+    res[0] = '(';
+    int indice = 1;
     for (int i = 0; i < n; i++){
-        char* phi = contrainte_une_ligne(i,n);
-        l[i] = phi;
+        while(taille_res<indice+strlen(l[i])+10){
+            taille_res*=2;
+            res=realloc(res,taille_res*sizeof(char));
+
+        }
+        for (int j = 0; j < strlen(l[i]);j++){
+            res[indice] = l[i][j];
+            indice ++;
+        }
+        if (i != n - 1){ 
+            res[indice] = ' ';
+            res[indice+1] = '|';
+            res[indice+2] = ' ';
+            indice = indice + 3;
+        }
     }
-    
-    char* res = separation_et(l,n);
-    free(l);
-
-    return res;
-    
-}
-
-char * contrainte_une_colonne(int i ,int n ){
-   char** l=malloc(n*sizeof(char*));
-   for(int j=0;j<n;j++){
-      l[j]=variable(j,i);
-   }
-   int *taille_phi=malloc(sizeof(int));
-   char* phi = au_moins_une(l,n,taille_phi);
-
-    
-    free(taille_phi);
-    free (l);
-    return phi;
-}
-
-char *contrainte_toutes_colonnes(int n ){
-    char** l = malloc(n*sizeof(char*));
-    char *phi=NULL;
-    for (int i = 0; i < n; i++){
-        phi = contrainte_une_colonne(i,n);
-        l[i] = phi;
-    }
-    char* res = separation_et (l,n);
-    free(l);
+    res[indice] = ')';
+    res[indice+1]='\0';
+    *taille_formule=taille_res;
     return res;
 }
-//Diagonale -1 -> diagonale qui commence à [1][0]
-char *contrainte_une_diagonale(int i,int n ){
-    
-    char **l=malloc((n-i)*sizeof(char*));
-
-    
-    if (i<0){
-       i= -i ;
-       int colonne=0; 
-       for(int j=i;j<n;j++){
-          l[colonne]=variable(j,colonne);
-          colonne++;
-       }
-       
-    }
-    else{
-       int ligne=0;
-       for(int j=i;j<n;j++){
-          l[ligne]=variable(ligne,j);
-          ligne++;
-       }
-    }
-    
-    
-    
-    char *phi=separation_et(l,(n-i));
-    for(int j=0;j<n-i;j++){
-        free(l[j]);
-    }
-    
 
 
-    free(l);
-    
-    
-    return phi;
+char* au_plus_une(char**l,int n,int *taille_sauvegarde){
+    /*
+    On va faire la négation de au moins 2 , (en effet pour N variables, on fera au total 2 parmi N paquets à évaluer qui sont chacun une conjonction de 2 variable, et l'ensemble est une négation d'une FN C
+    Et donc en développement la négation , on a une FNC avec dans chaque 2 variables, la disjonction de la négation 2 variables 
+    */
+    int taille_res=100000;
+    char *res =malloc(taille_res*sizeof(char));
+    int indice =0;
+    for(int i=0;i<n;i++){
 
-
-}
-
-char *contrainte_toute_diagonale(int n ){
-   char** l = malloc(((2*n)-1)*sizeof(char*));
-    
-    l[0]=contrainte_une_diagonale(0,n);
-
-    
-    for (int i = -1; i > (-n); i--){
-        l[-i] = contrainte_une_diagonale(i,n);
+      res[indice]='(';
+      indice++;
+      //Commencement de la création du paquet
+      for (int j=i;j<n;j++){
+        while(taille_res<indice+strlen(l[j])+strlen(l[i])+15){
+        taille_res*=2;
+        res=realloc(res,taille_res*sizeof(char));
         
-       
+      }
+        if(strlen(l[j])!=1){//On traite le cas où ce n'est pas juste une variable
+                
+                res[indice]='(';
+                res[indice+1]='~';
+                indice+=2;
+                for(int z=0;z<strlen(l[j]);z++){
+                    res[indice+z]=l[j][z];
+                }
+                indice+=strlen(l[j]);
+                res[indice]=')';
+                indice++;
+            }
+        else{
+            res[indice]='~';
+            res[indice+1]=l[j][0];
+            indice+=2;
+            }
+        res[indice ]='|';
+        indice++;
+        if(strlen(l[i])==1){
+           res[indice]='~';
+           indice++;
+           res[indice]=l[i][0];
+           indice++;
+           res[indice]=')';//fermeture du paquet
+           indice++;
+        }
+        else{
+           for(int z=0;z<strlen(l[j]);z++){
+                    res[indice+z]=l[j][z];
+                }
+                indice+=strlen(l[j]);
+                res[indice]=')';
+                res[indice+1]=')';// Fermeture du paquet 
+            
+        }
+
+      }
+      if(i!=(n-1)){
+        res[indice]='&';
+        indice++;
+      }
     }
-    
-    for(int i=1;i<n ;i++){
-       l[i+n-1]=contrainte_une_diagonale(i,n);
+    res[indice]='\0';
+    *taille_sauvegarde=taille_res;
+    return res;
+
+}
+
+
+char* separation_et(char** l, int n){//attention modification à faire,fonction auxiliaire pour la Q30
+    int taille_res=5000;
+    char* res = malloc(taille_res*sizeof(char));
+
+    res[0] = '(';
+    res[1]='\0';
+    int indice = 1;
+    int taille_l_i=0;
+    for (int i = 0; i < n; i++){
+        taille_l_i=strlen(l[i]);
+        while(taille_res<indice+taille_l_i+10){
+            taille_res*=2;
+            res=realloc(res,taille_res*sizeof(char));
+
+        }
+        for (int j = 0; j < taille_l_i;j++){
+            res[indice] = l[i][j];
+            indice ++;
+            
+        }
+        if (i != n - 1){ 
+            res[indice] = ' ';
+            res[indice+1] = '&';
+            res[indice+2] = ' ';
+            indice = indice + 3;
+        }
+        res[indice+1]='\0';
     }
-    char* res = separation_et (l,(2*n)-1);
-    for(int j=0;j<2*n-1;j++){
-        free(l[j]);
-    }
-    
-    free(l);
+    res[indice] = ')';
+    res[indice+1]='\0';
     return res;
 }
 
-void gen_formule_n_dames(int n,char* filename){
-   char *contrainte1=contrainte_toutes_lignes(n);
-   char *contrainte2=contrainte_toutes_colonnes(n);
-   char *contrainte3=contrainte_toute_diagonale(n);
-
-   char **l=malloc(3*sizeof(char*));
-   l[0]=contrainte1;
-   l[1]=contrainte2;
-   l[2]=contrainte3;
-
-   char *formule_resolution_pb_n_dames=separation_et(l,3);
-   free(l);
-
-   FILE *fichier=fopen(filename,"w");
-   fputs(formule_resolution_pb_n_dames,fichier);
-   fclose(fichier);
-
-
-   free(formule_resolution_pb_n_dames);
-
-
-}
-
-int main(){
-    //char* phi = contrainte_toutes_colonnes(8); // insérer ici le test à faire
-    char*phi2=contrainte_toutes_lignes(8);
-    //char *phi3=contrainte_toute_diagonale(4);
-    //printf("%s\n\n", phi); 
-    //printf("%s\n\n",phi2);
-    printf("%s\n\n",phi2);
-    free(phi2);
-
-    return 0;
-}
