@@ -14,9 +14,10 @@ char* contrainte_une_ligne(int i, int n){
     for (int j = 0; j < n; j++){
         l[j] = variable(i,j);
     }
-    int *taille_phi1=NULL;
-    int *taille_phi2=NULL;
+    int *taille_phi1=malloc(sizeof(int));
+    int *taille_phi2=malloc(sizeof(int));
     char* phi1 = au_moins_une(l,n,taille_phi1);
+    
     char* phi2 = au_plus_une(l,n,taille_phi2);
     char* phi3 = malloc(   ((*taille_phi1)+ (*taille_phi2)+1)*sizeof(char)); 
     strcpy(phi3, phi1); 
@@ -24,18 +25,26 @@ char* contrainte_une_ligne(int i, int n){
     strcat(phi3, phi2);
 
     free (l);
+    free(taille_phi1);
+    free(taille_phi2);
     return phi3;
+
 }
 
+
 char* contrainte_toutes_lignes(int n){
+    
     char** l = malloc(n*sizeof(char*));
     for (int i = 0; i < n; i++){
         char* phi = contrainte_une_ligne(i,n);
         l[i] = phi;
     }
-    char* res = separation_et   (l,n);
+    
+    char* res = separation_et(l,n);
     free(l);
+
     return res;
+    
 }
 
 char * contrainte_une_colonne(int i ,int n ){
@@ -43,11 +52,11 @@ char * contrainte_une_colonne(int i ,int n ){
    for(int j=0;j<n;j++){
       l[j]=variable(j,i);
    }
-   int *taille_phi=NULL;
+   int *taille_phi=malloc(sizeof(int));
    char* phi = au_moins_une(l,n,taille_phi);
 
     
-
+    free(taille_phi);
     free (l);
     return phi;
 }
@@ -65,7 +74,9 @@ char *contrainte_toutes_colonnes(int n ){
 }
 //Diagonale -1 -> diagonale qui commence à [1][0]
 char *contrainte_une_diagonale(int i,int n ){
+    
     char **l=malloc(n*sizeof(char*));
+
     
     if (i<0){
        i= -i ;
@@ -84,11 +95,17 @@ char *contrainte_une_diagonale(int i,int n ){
           ligne++;
        }
     }
-    int *taille_phi=NULL;
-    char *phi=au_plus_une(l,n,taille_phi);
+    
+    int *taille_phi=malloc(sizeof(int));
+    
+    //char *phi=au_plus_une(l,n,taille_phi);
 
-    free(l);
-    return phi;
+
+    free(taille_phi);
+    //free(l);
+    
+    
+    return "co";
 
 
 }
@@ -98,17 +115,21 @@ char *contrainte_toute_diagonale(int n ){
     char *phi=NULL;
     l[0]=contrainte_une_diagonale(0,n);
 
+    
     for (int i = -1; i > (-n); i--){
         phi = contrainte_une_colonne(i,n);
         l[-i] = phi;
     }
-    for(int i=1;i<n;i++){
+    
+    for(int i=1;i<n ;i++){
        phi=contrainte_une_diagonale(i,n);
        l[i+n+1]=phi;
     }
-    char* res = separation_et (l,(2*n)-1);
+    
+    //char* res = separation_et (l,(2*n)-1);
+
     free(l);
-    return res;
+    return "co";
 }
 
 void gen_formule_n_dames(int n,char* filename){
@@ -135,7 +156,7 @@ void gen_formule_n_dames(int n,char* filename){
 }
 
 int main(){
-    char* phi = contrainte_toutes_lignes(5);
+    char* phi = contrainte_toutes_colonnes(8); // insérer ici le test à faire
     printf("%s\n", phi); 
     return 0;
 }
