@@ -41,16 +41,14 @@ char* au_plus_une(char**l,int n,int *taille_sauvegarde){
     char *res =malloc(taille_res*sizeof(char));
     int indice =0;
     for(int i=0;i<n;i++){
-
       res[indice]='(';
       indice++;
       //Commencement de la création du paquet
-      for (int j=i;j<n;j++){
+      for (int j=i+1;j<n;j++){// attention chg avec le +1
         while(taille_res<indice+strlen(l[j])+strlen(l[i])+15){
-        taille_res*=2;
-        res=realloc(res,taille_res*sizeof(char));
-        
-      }
+            taille_res*=2;
+            res=realloc(res,taille_res*sizeof(char));
+        }
         if(strlen(l[j])!=1){//On traite le cas où ce n'est pas juste une variable
                 
                 res[indice]='(';
@@ -79,13 +77,18 @@ char* au_plus_une(char**l,int n,int *taille_sauvegarde){
            indice++;
         }
         else{
-           for(int z=0;z<strlen(l[j]);z++){
-                    res[indice+z]=l[j][z];
+           for(int z=0;z<strlen(l[i]);z++){
+                    res[indice+z]=l[i][z];
                 }
-                indice+=strlen(l[j]);
+                indice+=strlen(l[i]);
                 res[indice]=')';
                 res[indice+1]=')';// Fermeture du paquet 
+                indice +=2;
             
+        }
+        if(j!=(n-1)){
+           res[indice]='&';
+           indice++;
         }
 
       }
@@ -93,7 +96,7 @@ char* au_plus_une(char**l,int n,int *taille_sauvegarde){
         res[indice]='&';
         indice++;
       }
-    }
+    }   
     res[indice]='\0';
     *taille_sauvegarde=taille_res;
     return res;
