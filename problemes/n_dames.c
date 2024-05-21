@@ -22,6 +22,7 @@
 
         char* phi3 = malloc(   ((*taille_phi1)+ (*taille_phi2)+1)*sizeof(char)); 
         phi3[0]='\0';
+        printf("%s\n\n",phi2);
         strcpy(phi3, phi1); 
         strcat(phi3, "&");
         strcat(phi3, phi2);
@@ -55,7 +56,7 @@
         l[j]=variable(j,i);
     }
     int *taille_phi=malloc(sizeof(int));
-    char* phi = au_moins_une(l,n,taille_phi);
+    char* phi = au_plus_une(l,n,taille_phi);
 
         
         free(taille_phi);
@@ -98,8 +99,8 @@
         }
         
         
-        
-        char *phi=separation_et(l,(n-i));
+        int *taille_phi=malloc(sizeof(int));
+        char *phi=au_plus_une(l,(n-i),taille_phi);
         for(int j=0;j<n-i;j++){
             free(l[j]);
         }
@@ -107,6 +108,7 @@
 
 
         free(l);
+        free(taille_phi);
         
         
         return phi;
@@ -163,12 +165,12 @@
 
     int main(){
         //char* phi = contrainte_toutes_colonnes(8); // insérer ici le test à faire
-        char*phi2=contrainte_toutes_lignes(8);
+        char *phi=contrainte_une_diagonale(2,8);
         //char *phi3=contrainte_toute_diagonale(4);
-        //printf("%s\n\n", phi); 
+        printf("%s\n\n", phi); 
         //printf("%s\n\n",phi2);
-        printf("%s\n\n",phi2);
-        free(phi2);
+        
+        free(phi);
 
         return 0;
     }
