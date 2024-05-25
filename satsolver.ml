@@ -241,21 +241,27 @@ let  quine(f:formule):sat_result=
 		      match valuation_actu with
 		        |x::q->begin
 						    match x with 
-						      |(variable,true)->remplacement_quine f_sauvegarde f_sauvegarde ((variable,false)::q)(liste_var_a_test) 
+						      |(variable,true)->let retour_quine =(simpl_full (subst f_sauvegarde variable Bot )) in if (retour_quine=Top) then (Some ((variable,false)::q ))
+									  else 
+										  if retour_quine =Bot then None (*Peu importe le booléen associé à variable dans n'importe quel environnement, la formule sera évaluée comme false*)
+											else  remplacement_quine retour_quine retour_quine ((variable,false)::q) (liste_var_a_test) 
 									|(variable,false)->None   (*non sat*)
 							end
 						|[]->None
 			end
-		|_->match liste_var_a_test with(*Dans le cas où on ne peut encore déterminer si c'est sat*)
-		      |x::q->let post_chg=(subst f x Top )in remplacement_quine (simpl_full post_chg) f ((x,true)::valuation_actu) q  
-					|[]->failwith "Erreur ,var a test= [] , la fonction ne marche pas. CODE A MODIFIER " 
+		|_->begin 
+		  match liste_var_a_test with(*Dans le cas où on ne peut encore déterminer si c'est sat*)
+		    |x::q->let post_chg=(subst f x Top )in remplacement_quine (simpl_full post_chg) f ((x,true)::valuation_actu) q  
+			  |[]->failwith "Erreur ,var a test= [] , la fonction ne marche pas. CODE A MODIFIER " 
+			end 
   in remplacement_quine f f [] liste_variables 
 (*Q23*)
 	
 let rec print_true(environnement:valuation):unit=
    match environnement with
-	 |(variable,true)::q->print_string(variable);print_true q
+	 |(variable,true)::q->print_string(variable);print_string("\n");print_true q
 	 |[]->print_string "\n"
+	 |_->print_string ""
 
 
 
@@ -289,24 +295,25 @@ let test()=
 	 
 	 
 let main()=
-   print_int (Array.length Sys.argv ); print_string "\n\n";
+   (**print_int (Array.length Sys.argv ); print_string "\n\n";**)
    if (Array.length Sys.argv)=1 then failwith "No argument "
    else
       if Sys.argv.(1) ="test" then test()
       else
-         let fichier =read_file Sys.argv.(1) in
-         (**print_string fichier; 
+         (**let fichier =read_filxe Sys.argv.(1) in
+         print_string fichier; 
          print_string "\n\n";
          print_string Sys.argv.(0); print_string "\n\n";
          print_string Sys.argv.(1);print_string "\n\n"
 **)
-  let formule=from_file fichier in
+  let formule=from_file Sys.argv.(1) in
 	let reponse=quine formule in 
 	match reponse with
-	|None->print_string"Cette formule n'est pas satisfiable!\n"
-	|Some environnement->if environnement =[]then print_string "Il faut que toutes les variables soient évalués en 0 \n"
+	  |None->print_string"Cette formule n'est pas satisfiable!\n"
+	  |Some environnement->if environnement =[]then print_string "Il faut que toutes les variables soient évalués en 0 \n"
 	else print_string "La formule est satisfiable en assignant 1 aux variables suivantes et 0 aux autres:\n" ;print_true environnement     
     
       
 let _=main()
+
 
