@@ -168,7 +168,6 @@ char *contrainte_toute_diagonale(int n ){
     l[2]=contrainte3;
 
     char *formule_resolution_pb_n_dames=separation_et(l,3);;
-    printf("%s",formule_resolution_pb_n_dames);
     free(l[0]);
     free(l[1]);
     free(l[2]);
@@ -185,7 +184,7 @@ char *contrainte_toute_diagonale(int n ){
     }
 
     int main(){
-        gen_formule_n_dames(8,"8dames.txt");
+        gen_formule_n_dames(8,"test.txt");
         
         return 0;
     }
