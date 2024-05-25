@@ -19,10 +19,8 @@ char* au_moins_une(char** l, int n,int *taille_formule){
             indice ++;
         }
         if (i != n - 1){ 
-            res[indice] = ' ';
-            res[indice+1] = '|';
-            res[indice+2] = ' ';
-            indice = indice + 3;
+            res[indice] = '|';
+            indice ++;
         }
     }
     res[indice] = ')';//fermeture principale
@@ -49,13 +47,10 @@ char* au_plus_une(char**l,int n,int *taille_sauvegarde){
             taille_res*=2;
             res=realloc(res,taille_res*sizeof(char));
         }
-        res[indice]=' ';
         for(int i=0;i<strlen(l[0]);i++){
            res[indice]=l[0][i];
            indice++;
         }
-        res[indice]=' ';
-        indice++;
         res[indice]=')';//fermeture principale 1
         indice++;
         res[indice]='\0';
@@ -64,73 +59,69 @@ char* au_plus_une(char**l,int n,int *taille_sauvegarde){
     for(int i=0;i<n-1;i++){
       res[indice]='(';//ouverture
       indice++;
-      res[indice]=' ';
-      indice++;
     
       //Commencement de la création du paquet
-      for (int j=i+1;j<n;j++){// attention chg avec le +1
+      for (int j=i+1;j<n;j++){// attention chg avec le +1s
         while(taille_res<indice+strlen(l[j])+strlen(l[i])+15){
             taille_res*=2;
             res=realloc(res,taille_res*sizeof(char));
         }
+
+        res[indice]='(';
+        indice++;
+        
         if(strlen(l[j])!=1){//On traite le cas où ce n'est pas juste une variable
                 
                 res[indice]='~';
                 indice++;
                 for(int z=0;z<strlen(l[j]);z++){
-                    res[indice+z]=l[j][z];
+                    res[indice]=l[j][z];
+                    indice++;
                 }
-                indice+=strlen(l[j]);
+                
                 
             }
         else{
             res[indice]='~';
+            indice++;
             res[indice+1]=l[j][0];
-            indice+=2;
+            indice++;
             }
-        res[indice]=' ';
-        indice++;
         
         res[indice ]='|';
-        indice++;
-        res[indice]=' ';
         indice++;
         if(strlen(l[i])==1){
            res[indice]='~';
            indice++;
            res[indice]=l[i][0];
            indice++;
-           res[indice]=')';//fermeture du paquet
-           indice++;
+           
         }
         else{
            for(int z=0;z<strlen(l[i]);z++){
-                    res[indice+z]=l[i][z];
+                    res[indice]=l[i][z];
+                    indice++;
                 }
-                indice+=strlen(l[i]);
-                res[indice]=' ';
-                res[indice+1]=')';// Fermeture du paquet 
-                indice +=2;
             
         }
+        res[indice]=')';
+        indice++;
+
         if(j!=(n-1)){
-           res[indice]=' ';
-           indice++;
            res[indice]='&';
-           indice++;
-           res[indice]=' ';
            indice++;
         }
 
       }
+      res[indice]=')';
+      indice++;
+
       if(i!=(n-2)){
-        res[indice]=' ';
-        indice++;
         res[indice]='&';
         indice++;
-        res[indice]=' ';
-        indice++;
       }
+
+
     }
     res[indice]=')';//fermeture principale 2
     indice++;   
@@ -163,10 +154,8 @@ char* separation_et(char** l, int n){//attention modification à faire,fonction 
         }
         if (i != (n -1)){ 
             //printf("%d\n",i);
-            res[indice] = ' ';
-            res[indice+1] = '&';
-            res[indice+2] = ' ';
-            indice = indice + 3;
+            res[indice]='&';
+            indice++;
         }
         res[indice+1]='\0';
     }
