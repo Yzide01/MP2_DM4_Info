@@ -43,10 +43,18 @@ char* au_plus_une(char**l,int n,int *taille_sauvegarde){
     indice++;
     if(n==1){
       
-       while(taille_res<indice+strlen(l[0])+15){
+       while(taille_res<indice+2*strlen(l[0])+15){
             taille_res*=2;
             res=realloc(res,taille_res*sizeof(char));
         }
+        for(int i=0;i<strlen(l[0]);i++){
+           res[indice]=l[0][i];
+           indice++;
+        }
+        res[indice]='|';
+        indice++;
+        res[indice]='~';
+        indice++;
         for(int i=0;i<strlen(l[0]);i++){
            res[indice]=l[0][i];
            indice++;
@@ -84,7 +92,7 @@ char* au_plus_une(char**l,int n,int *taille_sauvegarde){
         else{
             res[indice]='~';
             indice++;
-            res[indice+1]=l[j][0];
+            res[indice]=l[j][0];
             indice++;
             }
         
@@ -98,6 +106,8 @@ char* au_plus_une(char**l,int n,int *taille_sauvegarde){
            
         }
         else{
+           res[indice]='~';
+           indice++;
            for(int z=0;z<strlen(l[i]);z++){
                     res[indice]=l[i][z];
                     indice++;
