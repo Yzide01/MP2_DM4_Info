@@ -143,34 +143,30 @@ char* au_plus_une(char**l,int n,int *taille_sauvegarde){
 }
 
 
-char* separation_et(char** l, int n){//attention modification à faire,fonction auxiliaire pour la Q30
-    int taille_res=5000;
-    char* res = malloc(taille_res*sizeof(char));
+char* separation_et(char** l, int n) { // attention modification à faire, fonction auxiliaire pour la Q30
+    int taille_res = 5000;
+    char* res = malloc(taille_res * sizeof(char));
 
-    res[0]='\0';
-    int indice = 0;
-    int taille_l_i=0;
-    for (int i = 0; i < n; i++){
-        taille_l_i=strlen(l[i]);
-        while(taille_res<indice+taille_l_i+1){
-            taille_res*=2;
-            res=realloc(res,taille_res*sizeof(char));
-
+    res[0] = '(';
+    int indice = 1;
+    int taille_l_i = 0;
+    for (int i = 0; i < n; i++) {
+        taille_l_i = strlen(l[i]);
+        while (taille_res < indice + taille_l_i + 3) { 
+            taille_res *= 2;
+            res = realloc(res, taille_res * sizeof(char));
         }
-        for (int j = 0; j < taille_l_i;j++){
+        for (int j = 0; j < taille_l_i; j++) {
             res[indice] = l[i][j];
-            indice ++;
-            
-        }
-        if (i != (n -1)){ 
-            //printf("%d\n",i);
-            res[indice]='&';
             indice++;
         }
-        res[indice+1]='\0';
+        if (i != (n - 1)) {
+            res[indice] = '&';
+            indice++;
+        }
     }
-    res[indice]='\0';
+    res[indice] = ')';
+    res[indice + 1] = '\0';
     
     return res;
 }
-
