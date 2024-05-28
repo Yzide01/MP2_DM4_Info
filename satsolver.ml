@@ -218,13 +218,13 @@ let rec simpl_step (f: formule): formule*bool=
 
 
 let rec simpl_full(f:formule):formule=
-  let (f_simplifie,bool_simplification) =simpl_step f in if bool_simplification=true then simpl_full f_simplifie else f_simplifie
+  let (f_simplifie,bool_simplification) = simpl_step f in if bool_simplification then simpl_full f_simplifie else f_simplifie
 
 (*Q21*)
-let rec subst(f:formule)(remplace:string)(remplacement: formule):formule=
+let rec subst(f:formule)(remplace:string)(remplacement: formule):formule =
   match f with 
   |Var x->if x=remplace then remplacement else Var x
-  |And(x,y)->And(subst x  remplace remplacement,subst y remplace remplacement)
+  |And(x,y)->And(subst x remplace remplacement,subst y remplace remplacement)
 	|Or(x,y)->Or(subst x  remplace remplacement,subst y remplace remplacement)
 	|Not(x)->Not(subst x  remplace remplacement)
 	|Top->Top
@@ -234,34 +234,29 @@ let rec subst(f:formule)(remplace:string)(remplacement: formule):formule=
 let  quine(f:formule):sat_result=
   let liste_variables = calcul_var_formule f in
 	(*f_sauvegarde est très importante si on a remplacé X par top mais que ça nous donne bot après simplification de la nouvelle formule, alors on révalue la formule avant le changement qui est f_sauvegarde en remplacement X par Bot *)
-  let rec remplacement_quine(f :formule)(f_sauvegarde:formule)(valuation_actu:valuation)(liste_var_a_test:'a list):sat_result=
+  let rec remplacement_quine (f : formule) (valuation_actu : valuation) (liste_var_a_test : 'a list) : sat_result =
 	  match f with 
 	  |Top->Some valuation_actu
-		|Bot->begin
-		      match valuation_actu with
-		        |x::q->begin
-						    match x with 
-						      |(variable,true)->let retour_quine =(simpl_full (subst f_sauvegarde variable Bot )) in if (retour_quine=Top) then (Some ((variable,false)::q ))
-									  else 
-										  if retour_quine =Bot then None (*Peu importe le booléen associé à variable dans n'importe quel environnement, la formule sera évaluée comme false*)
-											else  remplacement_quine retour_quine retour_quine ((variable,false)::q) (liste_var_a_test) 
-									|(variable,false)->None   (*non sat*)
-							end
-						|[]->None
+		|Bot->None
+		| _ -> begin
+		  match liste_var_a_test with (*Dans le cas où on ne peut encore déterminer si c'est sat*)
+				|[] ->None
+				|x::q ->
+					let resultat_quine = remplacement_quine (simpl_full (subst f x Top)) ((x,true)::valuation_actu) q in
+					match resultat_quine with
+					|Some v->Some v
+					|None-> remplacement_quine (simpl_full (subst f x Bot)) ((x,false)::valuation_actu) q 
 			end
-		|_->begin 
-		  match liste_var_a_test with(*Dans le cas où on ne peut encore déterminer si c'est sat*)
-		    |x::q->let post_chg=(subst f x Top )in remplacement_quine (simpl_full post_chg) f ((x,true)::valuation_actu) q  
-			  |[]->failwith "Erreur ,var a test= [] , la fonction ne marche pas. CODE A MODIFIER " 
-			end 
-  in remplacement_quine f f [] liste_variables 
+  in remplacement_quine f [] liste_variables 
+
+
 (*Q23*)
 	
 let rec print_true(environnement:valuation):unit=
-   match environnement with
-	 |(variable,true)::q->print_string(variable);print_string("\n");print_true q
-	 |[]->print_string "\n"
-	 |_->print_string ""
+  match environnement with
+	 	|[]->print_string "\n"
+	 	|(variable,true)::q->print_string(variable);print_string("\n");print_true q
+	 	|(variable, false)::q->print_string "";print_true q
 
 
 
@@ -310,10 +305,10 @@ let main()=
 	let reponse=quine formule in 
 	match reponse with
 	  |None->print_string"Cette formule n'est pas satisfiable!\n"
-	  |Some environnement->if environnement =[]then print_string "Il faut que toutes les variables soient évalués en 0 \n"
-	else print_string "La formule est satisfiable en assignant 1 aux variables suivantes et 0 aux autres:\n" ;print_true environnement     
+	  |Some environnement->print_string "La formule est satisfiable en assignant 1 aux variables suivantes et 0 aux autres:\n" ;print_true environnement     
     
       
 let _=main()
+
 
 
